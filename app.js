@@ -1,1 +1,50 @@
-const API="/api/emission";let startedMs=null;function fmt(ms){let s=Math.max(0,Math.floor(ms/1000)),h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return[h,m,x].map(v=>String(v).padStart(2,"0")).join(":")}function render(){if(startedMs)document.querySelector("#timer").textContent=fmt(Date.now()-startedMs)}async function sync(){try{let r=await fetch(API,{cache:"no-store"});if(!r.ok)throw 0;let d=await r.json(),raw=d.previous_start??d.last_emission,t=typeof raw==="number"?(raw<2e12?raw*1000:raw):Date.parse(raw);if(!Number.isFinite(t))throw 0;startedMs=t;document.querySelector("#started").textContent="Начался: "+new Date(t).toLocaleString("ru-RU")}catch(e){document.querySelector("#started").textContent="API пока не подключён — работает прототип"}render()}sync();setInterval(sync,60000);setInterval(render,1000);document.querySelector("#botLink").href="https://t.me/";
+const API = '/api/emission';
+let startedMs = null;
+
+function fmt(ms) {
+  let s = Math.max(0, Math.floor(ms / 1000));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const x = s % 60;
+  return [h, m, x].map(v => String(v).padStart(2, '0')).join(':');
+}
+
+function render() {
+  const timer = document.querySelector('#timer');
+  if (timer && startedMs) timer.textContent = fmt(Date.now() - startedMs);
+}
+
+function statusText(data) {
+  if (data.source === 'error') return 'Ошибка связи с STALZONE API';
+  if (data.source === 'waiting') return 'Ожидание API…';
+  return data.active ? '☢️ ВЫБРОС ИДЁТ' : 'API ONLINE';
+}
+
+async function sync() {
+  try {
+    const r = await fetch(API, { cache: 'no-store' });
+    if (!r.ok) throw new Error('API response ' + r.status);
+    const d = await r.json();
+
+    const raw = d.lastEmission;
+    const t = raw ? Date.parse(raw) : NaN;
+    if (!Number.isFinite(t)) throw new Error('Нет времени выброса');
+
+    startedMs = t;
+    document.querySelector('#started').textContent =
+      'Начался: ' + new Date(t).toLocaleString('ru-RU');
+    document.querySelector('.online').textContent = statusText(d);
+    document.querySelector('.safe').textContent = d.active ? '● ВЫБРОС ИДЁТ' : '● БЕЗОПАСНО';
+  } catch (e) {
+    document.querySelector('#started').textContent = 'STALZONE API ещё не подключён';
+    document.querySelector('.online').textContent = '● API WAITING';
+  }
+  render();
+}
+
+sync();
+setInterval(sync, 60000);
+setInterval(render, 1000);
+
+const botLink = document.querySelector('#botLink');
+if (botLink) botLink.href = 'https://t.me/';

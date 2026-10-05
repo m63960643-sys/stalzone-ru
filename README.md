@@ -1,13 +1,16 @@
-STALZONE RU — Telegram prototype
+# STALZONE RU — official API + Telegram
 
-В комплекте: сайт, серверный /api/emission и Telegram notifier.
-Проверка нового выброса — раз в 60 секунд. При изменении timestamp отправляется одно сообщение.
+Этот вариант использует официальный STALZONE API для региона RU и Telegram Bot API.
 
-Для теста:
-1. Создайте бота через @BotFather.
-2. Напишите ему /start.
-3. Задайте TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID в секретах хостинга.
-4. npm start
+## Render environment variables
 
-Сейчас getEmission() использует DEMO_EMISSION. Следующий шаг — заменить его на официальный STALZONE API.
-Не помещайте токены или Client Secret в index.html/app.js.
+- TELEGRAM_BOT_TOKEN
+- TELEGRAM_CHAT_ID
+- STALZONE_CLIENT_ID
+- STALZONE_CLIENT_SECRET
+- STALZONE_REGION=RU
+- STALZONE_API_BASE_URL=https://eapi.stalzone.com
+- POLL_INTERVAL_MS=60000
+
+Для production API приложение STALZONE должно быть зарегистрировано и одобрено.
+Никогда не помещайте токены/секреты в HTML или GitHub.
