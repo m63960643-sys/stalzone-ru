@@ -28,11 +28,11 @@ async function sync() {
 
     const raw = d.lastEmission;
     const t = raw ? Date.parse(raw) : NaN;
-    if (!Number.isFinite(t)) throw new Error('Нет времени выброса');
+    if (!Number.isFinite(t)) throw new Error('Нет времени последнего завершённого выброса');
 
     startedMs = t;
     document.querySelector('#started').textContent =
-      'Начался: ' + new Date(t).toLocaleString('ru-RU');
+      'Последний выброс закончился: ' + new Date(t).toLocaleString('ru-RU');
     document.querySelector('.online').textContent = statusText(d);
     document.querySelector('.safe').textContent = d.active ? '● ВЫБРОС ИДЁТ' : '● БЕЗОПАСНО';
   } catch (e) {

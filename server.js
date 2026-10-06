@@ -16,7 +16,8 @@ let cache = {
   active: false,
   source: 'waiting'
 };
-let lastNotified = null;
+let lastSeenCurrentStart = null;
+let initialized = false;
 let pollInFlight = false;
 
 function asIso(value) {
@@ -61,7 +62,12 @@ async function fetchEmission() {
   const currentStart = asIso(data.currentStart);
   const previousStart = asIso(data.previousStart);
   const previousEnd = asIso(data.previousEnd);
-  const lastEmission = currentStart || previousStart;
+
+  // The timer is supposed to count from the end of the last completed
+  // emission, not from its start. While an emission is active, keep the
+  // completed-emission timer based on previousEnd and expose currentStart
+  // separately for Telegram notifications/status.
+  const lastEmission = previousEnd || previousStart || currentStart;
 
   return {
     lastEmission,
@@ -107,18 +113,21 @@ async function poll() {
   pollInFlight = true;
   try {
     const next = await fetchEmission();
-    const changed = cache.lastEmission && next.lastEmission && next.lastEmission !== cache.lastEmission;
+    const newEmissionStarted = initialized
+      && Boolean(next.currentStart)
+      && next.currentStart !== lastSeenCurrentStart;
 
+    lastSeenCurrentStart = next.currentStart || lastSeenCurrentStart;
+    initialized = true;
     cache = next;
 
-    if (changed && next.lastEmission !== lastNotified) {
-      const sent = await telegram(
+    if (newEmissionStarted) {
+      await telegram(
         `☢️ НАЧАЛСЯ ВЫБРОС!\n\n` +
         `Регион: 🇷🇺 ${REGION}\n` +
-        `Время начала: ${formatRu(next.lastEmission)}\n` +
+        `Время начала: ${formatRu(next.currentStart)}\n` +
         `Сайт: https://stalzone-ru.onrender.com`
       );
-      if (sent) lastNotified = next.lastEmission;
     }
   } catch (error) {
     cache.source = 'error';
