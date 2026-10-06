@@ -1,5 +1,5 @@
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;background:#090b08 url("zone-bar-bg.svg") center/cover fixed no-repeat;color:#d8decf;font-family:Arial,sans-serif}
+body{margin:0;min-height:100vh;background:#090b08 url("zone-bar.jpg") center/cover fixed no-repeat;color:#d8decf;font-family:Arial,sans-serif}
 body:before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(0,0,0,.72),rgba(0,0,0,.48) 45%,rgba(0,0,0,.78));pointer-events:none}
 main{width:min(900px,92vw);margin:auto;padding:34px 0}
 .logo{font-size:24px;font-weight:900;letter-spacing:.13em}.logo span{color:#78836c}
