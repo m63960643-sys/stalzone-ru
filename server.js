@@ -4,9 +4,10 @@ const path = require('path');
 
 const PORT = Number(process.env.PORT || 3000);
 const HOST = '0.0.0.0';
-const REGION = (process.env.STALZONE_REGION || 'RU').toUpperCase();
+const REGION = (process.env.STALZONE_REGION || 'EU').toUpperCase();
 const API_BASE = (process.env.STALZONE_API_BASE_URL || 'https://eapi.stalzone.com').replace(/\/$/, '');
 const POLL_MS = Number(process.env.POLL_INTERVAL_MS || 60000);
+const WATCH_REGIONS = ['RU', 'EU'];
 
 let cache = {
   lastEmission: null,
@@ -14,9 +15,13 @@ let cache = {
   previousStart: null,
   previousEnd: null,
   active: false,
-  source: 'waiting'
+  source: 'waiting',
+  region: REGION
 };
-let lastSeenCurrentStart = null;
+const seen = {
+  RU: null,
+  EU: null
+};
 let initialized = false;
 let pollInFlight = false;
 
@@ -26,14 +31,14 @@ function asIso(value) {
   return Number.isFinite(d.getTime()) ? d.toISOString() : null;
 }
 
-async function fetchEmission(region = REGION) {
+async function fetchEmission(region) {
   const clientId = process.env.STALZONE_CLIENT_ID;
   const clientSecret = process.env.STALZONE_CLIENT_SECRET;
   if (!clientId || !clientSecret) {
     throw new Error('STALZONE_CLIENT_ID / STALZONE_CLIENT_SECRET are not configured');
   }
 
-  const safeRegion = String(region || REGION).toUpperCase();
+  const safeRegion = String(region).toUpperCase();
   const url = `${API_BASE}/${encodeURIComponent(safeRegion)}/emission`;
   const r = await fetch(url, {
     headers: {
@@ -109,24 +114,40 @@ async function poll() {
   if (pollInFlight) return;
   pollInFlight = true;
   try {
-    const next = await fetchEmission(REGION);
-    const newEmissionStarted = initialized
-      && Boolean(next.currentStart)
-      && next.currentStart !== lastSeenCurrentStart;
+    const results = await Promise.all(WATCH_REGIONS.map(async region => {
+      try {
+        return await fetchEmission(region);
+      } catch (error) {
+        console.error(`[poll:${region}] ${error.message}`);
+        return { region, error: error.message };
+      }
+    }));
 
-    lastSeenCurrentStart = next.currentStart || lastSeenCurrentStart;
-    initialized = true;
-    cache = next;
+    for (const next of results) {
+      if (next.error) continue;
 
-    if (newEmissionStarted) {
-      const flag = REGION === 'EU' ? '🇪🇺' : '🇷🇺';
-      await telegram(
-        `☢️ НАЧАЛСЯ ВЫБРОС!\n\n` +
-        `Регион: ${flag} ${REGION}\n` +
-        `Время начала: ${formatRu(next.currentStart)}\n` +
-        `Сайт: https://stalzone-ru.onrender.com`
-      );
+      const newEmissionStarted = initialized
+        && Boolean(next.currentStart)
+        && next.currentStart !== seen[next.region];
+
+      seen[next.region] = next.currentStart || seen[next.region];
+
+      if (next.region === REGION) {
+        cache = next;
+      }
+
+      if (newEmissionStarted) {
+        const flag = next.region === 'EU' ? '🇪🇺' : '🇷🇺';
+        await telegram(
+          `☢️ НАЧАЛСЯ ВЫБРОС!\n\n` +
+          `Регион: ${flag} ${next.region}\n` +
+          `Время начала: ${formatRu(next.currentStart)}\n` +
+          `Сайт: https://stalzone-ru.onrender.com`
+        );
+      }
     }
+
+    initialized = true;
   } catch (error) {
     cache.source = 'error';
     console.error(`[poll] ${error.message}`);
@@ -156,7 +177,7 @@ const server = http.createServer(async (req, res) => {
 
   if (url.pathname === '/api/emission') {
     const requestedRegion = (url.searchParams.get('region') || REGION).toUpperCase();
-    if (!['RU', 'EU'].includes(requestedRegion)) {
+    if (!WATCH_REGIONS.includes(requestedRegion)) {
       return sendJson(res, 400, { error: 'Unsupported region' });
     }
     try {
@@ -168,7 +189,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (url.pathname === '/health') {
-    return sendJson(res, 200, { ok: true, source: cache.source, region: REGION });
+    return sendJson(res, 200, { ok: true, source: cache.source, region: REGION, watching: WATCH_REGIONS });
   }
 
   let requested = url.pathname === '/' ? '/index.html' : url.pathname;
@@ -184,7 +205,7 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(PORT, HOST, () => {
   console.log(`Running on ${HOST}:${PORT}`);
-  console.log(`STALZONE API: ${API_BASE}/${REGION}/emission`);
+  console.log(`STALZONE API watch: ${WATCH_REGIONS.map(r => `${API_BASE}/${r}/emission`).join(' | ')}`);
   poll();
   setInterval(poll, POLL_MS);
 });
