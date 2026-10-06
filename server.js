@@ -26,14 +26,15 @@ function asIso(value) {
   return Number.isFinite(d.getTime()) ? d.toISOString() : null;
 }
 
-async function fetchEmission() {
+async function fetchEmission(region = REGION) {
   const clientId = process.env.STALZONE_CLIENT_ID;
   const clientSecret = process.env.STALZONE_CLIENT_SECRET;
   if (!clientId || !clientSecret) {
     throw new Error('STALZONE_CLIENT_ID / STALZONE_CLIENT_SECRET are not configured');
   }
 
-  const url = `${API_BASE}/${encodeURIComponent(REGION)}/emission`;
+  const safeRegion = String(region || REGION).toUpperCase();
+  const url = `${API_BASE}/${encodeURIComponent(safeRegion)}/emission`;
   const r = await fetch(url, {
     headers: {
       'Accept': 'application/json',
@@ -62,11 +63,6 @@ async function fetchEmission() {
   const currentStart = asIso(data.currentStart);
   const previousStart = asIso(data.previousStart);
   const previousEnd = asIso(data.previousEnd);
-
-  // The timer is supposed to count from the end of the last completed
-  // emission, not from its start. While an emission is active, keep the
-  // completed-emission timer based on previousEnd and expose currentStart
-  // separately for Telegram notifications/status.
   const lastEmission = previousEnd || previousStart || currentStart;
 
   return {
@@ -75,7 +71,8 @@ async function fetchEmission() {
     previousStart,
     previousEnd,
     active: Boolean(currentStart),
-    source: 'official-api'
+    source: 'official-api',
+    region: safeRegion
   };
 }
 
@@ -112,7 +109,7 @@ async function poll() {
   if (pollInFlight) return;
   pollInFlight = true;
   try {
-    const next = await fetchEmission();
+    const next = await fetchEmission(REGION);
     const newEmissionStarted = initialized
       && Boolean(next.currentStart)
       && next.currentStart !== lastSeenCurrentStart;
@@ -122,9 +119,10 @@ async function poll() {
     cache = next;
 
     if (newEmissionStarted) {
+      const flag = REGION === 'EU' ? '🇪🇺' : '🇷🇺';
       await telegram(
         `☢️ НАЧАЛСЯ ВЫБРОС!\n\n` +
-        `Регион: 🇷🇺 ${REGION}\n` +
+        `Регион: ${flag} ${REGION}\n` +
         `Время начала: ${formatRu(next.currentStart)}\n` +
         `Сайт: https://stalzone-ru.onrender.com`
       );
@@ -157,7 +155,16 @@ const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
 
   if (url.pathname === '/api/emission') {
-    return sendJson(res, 200, cache);
+    const requestedRegion = (url.searchParams.get('region') || REGION).toUpperCase();
+    if (!['RU', 'EU'].includes(requestedRegion)) {
+      return sendJson(res, 400, { error: 'Unsupported region' });
+    }
+    try {
+      const data = await fetchEmission(requestedRegion);
+      return sendJson(res, 200, data);
+    } catch (error) {
+      return sendJson(res, 502, { source: 'error', error: error.message, region: requestedRegion });
+    }
   }
 
   if (url.pathname === '/health') {
