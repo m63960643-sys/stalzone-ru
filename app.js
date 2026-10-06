@@ -1,4 +1,4 @@
-const API = '/api/emission';
+let selectedRegion = 'RU';
 let startedMs = null;
 
 function fmt(ms) {
@@ -20,9 +20,15 @@ function statusText(data) {
   return data.active ? '☢️ ВЫБРОС ИДЁТ' : 'API ONLINE';
 }
 
+function setActiveButton() {
+  document.querySelectorAll('.region-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.region === selectedRegion);
+  });
+}
+
 async function sync() {
   try {
-    const r = await fetch(API, { cache: 'no-store' });
+    const r = await fetch('/api/emission?region=' + encodeURIComponent(selectedRegion), { cache: 'no-store' });
     if (!r.ok) throw new Error('API response ' + r.status);
     const d = await r.json();
 
@@ -36,15 +42,28 @@ async function sync() {
     document.querySelector('.online').textContent = statusText(d);
     document.querySelector('.safe').textContent = d.active ? '● ВЫБРОС ИДЁТ' : '● БЕЗОПАСНО';
   } catch (e) {
+    startedMs = null;
+    document.querySelector('#timer').textContent = '--:--:--';
     document.querySelector('#started').textContent = 'STALZONE API ещё не подключён';
     document.querySelector('.online').textContent = '● API WAITING';
   }
   render();
 }
 
+document.querySelectorAll('.region-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const nextRegion = btn.dataset.region;
+    if (nextRegion === selectedRegion) return;
+    selectedRegion = nextRegion;
+    startedMs = null;
+    setActiveButton();
+    document.querySelector('#timer').textContent = '--:--:--';
+    document.querySelector('#started').textContent = 'Загрузка региона ' + selectedRegion + '…';
+    sync();
+  });
+});
+
+setActiveButton();
 sync();
 setInterval(sync, 60000);
 setInterval(render, 1000);
-
-const botLink = document.querySelector('#botLink');
-if (botLink) botLink.href = 'https://t.me/';
