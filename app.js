@@ -31,11 +31,9 @@ async function sync() {
     const r = await fetch('/api/emission?region=' + encodeURIComponent(selectedRegion), { cache: 'no-store' });
     if (!r.ok) throw new Error('API response ' + r.status);
     const d = await r.json();
-
     const raw = d.lastEmission;
     const t = raw ? Date.parse(raw) : NaN;
     if (!Number.isFinite(t)) throw new Error('Нет времени последнего завершённого выброса');
-
     startedMs = t;
     document.querySelector('#started').textContent =
       'Последний выброс закончился: ' + new Date(t).toLocaleString('ru-RU');
@@ -60,6 +58,13 @@ document.querySelectorAll('.region-btn').forEach(btn => {
     document.querySelector('#timer').textContent = '--:--:--';
     document.querySelector('#started').textContent = 'Загрузка региона ' + selectedRegion + '…';
     sync();
+  });
+});
+
+document.querySelectorAll('.main-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.main-tab').forEach(tab => tab.classList.toggle('active', tab === btn));
+    document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.toggle('active', panel.id === btn.dataset.tab));
   });
 });
 
