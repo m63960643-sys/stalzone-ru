@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Арсенал в картинках — STALZONE RU</title>
+<meta name="theme-color" content="#090909">
+<link rel="icon" type="image/jpeg" sizes="128x128" href="/favicon.jpg">
+<link rel="stylesheet" href="style.css">
+<style>
+.weapon-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.weapon-tile{overflow:hidden;border:1px solid #51432f;background:rgba(5,7,5,.8)}
+.weapon-tile img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;background:#141713}
+.weapon-tile .weapon-copy{padding:14px}
+.weapon-tile h2{margin:3px 0 8px;font-size:18px;color:#e4d2a8}
+.weapon-tile p{font-size:13px;line-height:1.55;color:#c0beb3;margin:0}
+.weapon-type{font-size:10px;letter-spacing:.15em;color:#b99b69}
+@media(max-width:600px){.weapon-gallery{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+<header><div class="logo">STALZONE <span>RU</span></div><div class="online">● ZONE ARMORY</div></header>
+<nav class="main-tabs" aria-label="Разделы сайта">
+  <a class="main-tab" href="/">☢ ТАЙМЕР</a>
+  <a class="main-tab" href="/news.html">📡 НОВОСТИ</a>
+  <a class="main-tab" href="/weapons.html">⚔ ЛУЧШЕЕ ОРУЖИЕ</a>
+  <a class="main-tab active" href="/armory.html">▧ АРСЕНАЛ В КАРТИНКАХ</a>
+</nav>
+<section class="news-panel">
+<div class="label">ВИЗУАЛЬНЫЙ СПРАВОЧНИК</div>
+<h1>Арсенал Зоны</h1>
+<p class="news-intro">Посмотри на разные типы оружия и сравни, для какой дистанции и задачи они подходят. Картинки иллюстративные; точные игровые модели и сезонный рейтинг сверяй в STALZONE.</p>
+<div class="weapon-gallery">
+<article class="weapon-tile">
+<img src="https://images.unsplash.com/photo-1595590424283-b8f17842773f?auto=format&fit=crop&w=900&q=80" alt="Тактическая винтовка на тёмном фоне" loading="lazy">
+<div class="weapon-copy"><div class="weapon-type">01 / УНИВЕРСАЛЬНОЕ</div><h2>Штурмовая винтовка</h2><p>Универсальный вариант для разных дистанций. Смотри на отдачу, точность и цену патронов.</p></div>
+</article>
+<article class="weapon-tile">
+<img src="https://images.unsplash.com/photo-1584281722574-2c5e0b9b0b1f?auto=format&fit=crop&w=900&q=80" alt="Тактическое оружие крупным планом" loading="lazy">
+<div class="weapon-copy"><div class="weapon-type">02 / ТОЧНОСТЬ</div><h2>Винтовка для дальнего боя</h2><p>Подходит для дистанционной стрельбы, если хватает времени прицелиться и удерживать позицию.</p></div>
+</article>
+<article class="weapon-tile">
+<img src="https://images.unsplash.com/photo-1595590424283-b8f17842773f?auto=format&fit=crop&w=900&q=80" alt="Оружие для вылазки" loading="lazy">
+<div class="weapon-copy"><div class="weapon-type">03 / БЛИЖНИЙ БОЙ</div><h2>Дробовик</h2><p>Полезен на короткой дистанции. Учитывай перезарядку и запас боеприпасов.</p></div>
+</article>
+<article class="weapon-tile">
+<img src="https://images.unsplash.com/photo-1595590424283-b8f17842773f?auto=format&fit=crop&w=900&q=80" alt="Тактическое оружие и снаряжение" loading="lazy">
+<div class="weapon-copy"><div class="weapon-type">04 / КОМПАКТНОЕ</div><h2>Пистолет</h2><p>Запасной вариант, когда важны компактность и быстрый доступ. Проверь его характеристики в игре.</p></div>
+</article>
+</div>
+<div class="news-disclaimer">Примечание: это иллюстрации типов оружия, а не точные игровые рендеры. Если пришлёшь скриншоты оружия из STALZONE, можно заменить картинки на игровые и сделать рейтинг конкретных моделей.</div>
+</section>
+<footer><a href="/">← Вернуться к таймеру выброса</a> • STALZONE RU</footer>
+</main>
+</body>
+</html>
