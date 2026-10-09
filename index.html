@@ -13,6 +13,11 @@
 <body>
 <main>
 <header><div class="logo">STALZONE <span>RU</span></div><div class="online">● API WAITING</div></header>
+<nav class="main-tabs" aria-label="Разделы сайта">
+  <button class="main-tab active" data-tab="timer-panel">☢ ТАЙМЕР</button>
+  <button class="main-tab" data-tab="news-panel">📡 НОВОСТИ ОБНОВЛЕНИЯ</button>
+</nav>
+<div id="timer-panel" class="tab-panel active">
 <section class="hero">
 <div class="label">ПОСЛЕДНИЙ ВЫБРОС</div>
 <div class="region-switch" aria-label="Выбор региона">
@@ -27,7 +32,32 @@
 <div><b>🔔 TELEGRAM УВЕДОМЛЕНИЯ</b><p>Бот отправит сообщение, когда начнётся новый выброс.</p></div>
 <a id="botLink" href="https://t.me/stalzone_ru_alerts_bot">🔔 Telegram: @stalzone_ru_alerts_bot</a>
 </section>
-<footer>STALZONE RU • OFFICIAL API NOTIFIER</footer>
+</div>
+<section id="news-panel" class="tab-panel news-panel">
+<div class="label">ПОЛЕЗНОЕ ПОСЛЕ ОБНОВЛЕНИЯ</div>
+<h1>Где фармить после обновы?</h1>
+<p class="news-intro">Советы для сталкеров — следи за событиями и используй время в Зоне с пользой.</p>
+<article class="news-card featured">
+<div class="news-kicker">☢ СЕЗОННОЕ СОБЫТИЕ</div>
+<h2>Градус растёт, хабар зовёт</h2>
+<p>В новости от 7 октября сообщалось о событиях на фракционном Севере и в Лабиринте. Проверяй эти локации и актуальные условия в игре перед вылазкой.</p>
+<div class="news-note">Совет: бери снаряжение для вылазки и заранее планируй маршрут возвращения.</div>
+</article>
+<div class="news-grid">
+<article class="news-card">
+<div class="news-kicker">01 / ЛОКАЦИИ</div>
+<h2>Север и Лабиринт</h2>
+<p>Проверь текущие события и доступные ресурсы в этих локациях. Частота появления добычи может зависеть от условий события.</p>
+</article>
+<article class="news-card">
+<div class="news-kicker">02 / ЗАДАНИЯ</div>
+<h2>Не забывай про ежедневки</h2>
+<p>Заглядывай к заданиям повторно и сверяй время обновления с официальными объявлениями игры.</p>
+</article>
+</div>
+<div class="news-disclaimer">Информация подготовлена по новости, опубликованной 7 октября. Условия событий и награды могут меняться — проверяй актуальные сообщения STALZONE в игре.</div>
+</section>
+<footer>STALZONE RU • EMISSION TIMER • ZONE INTEL</footer>
 </main>
 <script src="app.js"></script>
 </body>
